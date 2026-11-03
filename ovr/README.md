@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OVR — self-improvement, ranked
 
-## Getting Started
+A private, invite-only PWA for one friend group. Tick habits, earn XP, and watch your **OVR** (40–99, sports-card style) climb across six attributes. Compete in a private weekly league.
 
-First, run the development server:
+- **Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind 4 · Motion · Recharts · Supabase (Postgres + RLS + Auth OTP + pg_cron) · Web Push · Vercel
+- **Docs:** [rating formula](docs/rating-formula.md) · [decisions](docs/decisions.md) · [progress](docs/progress.md) · [deploy](docs/deploy.md)
+
+## Run it locally
+
+Needs Node 22+ and Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npx supabase start          # local Postgres/Auth/Mailpit; applies migrations + seed (invite code LOCKIN)
+npm run build && npm start  # http://localhost:3000  (or: npm run dev)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sign in at http://localhost:3000/login with invite code `LOCKIN` and any email. The 6-digit code arrives in Mailpit at http://127.0.0.1:54324. `.env.local` holds the local demo keys (copy `.env.example` for production).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tests
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run test:unit   # engines, dates, offline queue, push, copy (Vitest)
+npm run test:db     # RLS on every table, RPCs, league, jobs, push queue, TS↔SQL parity for 10 golden personas
+npm run test:e2e    # Playwright against the production build: signup → quiz → Today → offline sync → league → share PNG → PWA
+npm test            # all of the above
+```
 
-## Learn More
+## Layout
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/(auth)/login          invite + email OTP
+app/onboarding            9-step setup quiz with hold-to-lock-in
+app/(app)/…               today, ovr, stats, league, league/[handle], profile, settings, habits, quit, journal
+app/api/push/*            push dispatch (cron) + test push
+components/…              ui, rating (OvrCard, radar, celebrations), habits, league, charts
+lib/rating-engine         OVR math (TS reference; DB is authoritative)
+lib/xp-engine             XP, levels, Simulator (replays history like the server)
+lib/offline-queue         IndexedDB tap queue (idempotent by op_id)
+lib/copy.ts               every user-facing string
+supabase/migrations       schema + RLS, engine, RPCs, cron
+tests/{unit,db,e2e}
+```

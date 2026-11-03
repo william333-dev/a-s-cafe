@@ -179,7 +179,7 @@ describe("today + stats + quit", () => {
   test("quit tracker: clean-day XP at midnight, slip resets counter but keeps best + XP", async () => {
     await setNow("2026-11-01T00:00:00Z");
     const u = await member("sam");
-    const [{ id }] = await asUser<{ id: string }>(u, "insert into public.quit_trackers(user_id, title) values ($1, 'Vape') returning id", [u]);
+    await asUser(u, "insert into public.quit_trackers(user_id, title) values ($1, 'Vape')", [u]);
     for (let d = 2; d <= 5; d++) {
       await setNow(`2026-11-0${d}T00:00:00Z`);
       await sql("select public.run_daily_jobs()");
