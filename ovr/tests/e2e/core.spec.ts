@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { noHorizontalScroll, pool, q, signIn, signUpAndOnboard, uniqueEmail } from "./helpers";
+import { noHorizontalScroll, q, signIn, signUpAndOnboard, uniqueEmail } from "./helpers";
 
-test.afterAll(() => pool.end());
 
 test("invite gate: no code, no account", async ({ page }) => {
   await page.goto("/login");
@@ -28,7 +27,7 @@ test("signup → quiz → Today → complete, perfect day, undo, OVR detail", as
     await rows.nth(i).click();
     await expect(rows.nth(i)).toHaveAttribute("data-done", "true");
   }
-  await expect(page.getByTestId("toast").filter({ hasText: "Perfect day" })).toBeVisible();
+  await expect(page.getByTestId("toast").filter({ hasText: /Perfect day\. \+\d+ bonus/ })).toBeVisible();
   await expect(page.getByTestId("today-status")).toHaveText("Perfect day. That's how it's done.");
   const xpBefore = await page.getByTestId("xp-today").textContent();
 
@@ -60,7 +59,7 @@ test("signup → quiz → Today → complete, perfect day, undo, OVR detail", as
   // sign out / in again lands on Today (already onboarded)
   await page.goto("/settings");
   await page.getByRole("button", { name: "Sign out" }).click();
-  await page.waitForURL("**/login");
+  await page.waitForURL(/\/login/);
   await signIn(page, email);
   await expect(page.getByTestId("habit-row").first()).toBeVisible();
 });

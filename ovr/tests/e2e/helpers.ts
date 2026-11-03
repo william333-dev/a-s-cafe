@@ -4,10 +4,12 @@ import pg from "pg";
 export const pool = new pg.Pool({ connectionString: "postgresql://postgres:postgres@127.0.0.1:54322/postgres", max: 2 });
 export const q = async <T = Record<string, unknown>>(sql: string, p: unknown[] = []) => (await pool.query(sql, p)).rows as T[];
 
-export async function otpFor(email: string): Promise<string> {
+export async function otpFor(email: string, since = 0): Promise<string> {
   for (let i = 0; i < 30; i++) {
     const r = await fetch(`http://127.0.0.1:54324/api/v1/messages?limit=50`).then((x) => x.json());
-    const m = (r.messages ?? []).find((x: { To: { Address: string }[] }) => x.To?.some((t) => t.Address === email));
+    const m = (r.messages ?? []).find(
+      (x: { To: { Address: string }[]; Created: string }) => x.To?.some((t) => t.Address === email) && Date.parse(x.Created) >= since - 2000,
+    );
     if (m) {
       const full = await fetch(`http://127.0.0.1:54324/api/v1/message/${m.ID}`).then((x) => x.json());
       const code = (full.Text as string).match(/\b(\d{6})\b/)?.[1];
@@ -63,8 +65,9 @@ export async function signUpAndOnboard(page: Page, opts: { email?: string; handl
 export async function signIn(page: Page, email: string) {
   await page.goto("/login");
   await page.getByLabel("Email").fill(email);
+  const since = Date.now();
   await page.getByRole("button", { name: "Send my code" }).click();
-  await page.getByLabel("6-digit code").fill(await otpFor(email));
+  await page.getByLabel("6-digit code").fill(await otpFor(email, since));
   await page.getByRole("button", { name: "Lock in" }).click();
   await page.waitForURL("**/today");
 }

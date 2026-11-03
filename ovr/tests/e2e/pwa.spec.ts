@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
-import { noHorizontalScroll, pool, signUpAndOnboard } from "./helpers";
+import { noHorizontalScroll, signUpAndOnboard } from "./helpers";
 
-test.afterAll(() => pool.end());
 
 test("manifest + icons are installable", async ({ request }) => {
   const m = await (await request.get("/manifest.webmanifest")).json();
@@ -25,8 +24,13 @@ test("service worker caches the shell; Today opens offline from cache", async ({
   await page.reload();
   await expect(page.getByTestId("habit-row").first()).toBeVisible();
   await expect(page.getByTestId("offline-banner")).toBeVisible();
-  await page.goto("/stats").catch(() => {});
-  await expect(page.locator("body")).toContainText(/Stats|offline/i);
+  // a never-visited tab still boots offline (its chunks were precached at install)
+  await page.goto("/stats");
+  await expect(page.getByTestId("offline-banner")).toBeVisible();
+  await expect(page.locator("body")).not.toContainText("This page couldn’t load");
+  // unknown dynamic URLs fall back to the offline page
+  await page.goto("/league/nobody-cached");
+  await expect(page.locator("body")).toContainText(/offline/i);
   await context.setOffline(false);
 });
 

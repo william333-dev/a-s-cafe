@@ -1,12 +1,11 @@
 "use client";
 import { useState } from "react";
-import { mutate as gmutate } from "swr";
 import { Avatar } from "@/components/league/avatar";
 import { LeagueRow } from "@/components/league/league-row";
 import { Button, Card, EmptyState, ErrorState, Header, SectionTitle, Segmented, Sheet, Skeleton } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 import { copy } from "@/lib/copy";
-import { useDuo, useLeague } from "@/lib/data";
+import { mutate as gmutate, useDuo, useLeague } from "@/lib/data";
 import { rpc } from "@/lib/supabase/client";
 
 export default function League() {

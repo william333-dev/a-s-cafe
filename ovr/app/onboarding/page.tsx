@@ -2,7 +2,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { mutate } from "swr";
 import { OvrCard } from "@/components/rating/ovr-card";
 import { Button, Input, Toggle } from "@/components/ui/primitives";
 import { HoldToLockInButton } from "@/components/ui/hold-button";
@@ -13,6 +12,7 @@ import { isIos, isStandalone } from "@/lib/haptics";
 import { enablePush, pushSupported } from "@/lib/push/client";
 import { ATTRIBUTES, baselineFromRatings, rankFor, type Attribute, type Difficulty } from "@/lib/rating-engine";
 import { rpc, supabase } from "@/lib/supabase/client";
+import { mutate } from "@/lib/data";
 
 type Starter = { title: string; emoji: string; attribute: Attribute; difficulty: Difficulty; on: boolean };
 
@@ -96,7 +96,8 @@ export default function Onboarding() {
   }
 
   const finish = async () => {
-    await mutate(["get_today"]);
+    // put fresh (onboarded) state in the cache before leaving, so the gate doesn't bounce us back
+    await mutate(["get_today"], rpc("get_today"), { revalidate: false }).catch(() => {});
     setTimeout(() => router.replace("/today"), 700);
   };
 

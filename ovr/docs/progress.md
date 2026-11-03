@@ -15,7 +15,7 @@
 
 ### Tests (all run locally against the real stack)
 
-- **Unit (Vitest), 58 tests:** rating engine (ranks, caps, ceilings, breadth, calibration, decay, quit → Discipline, times-per-week), streaks and shields, XP and levels, dates (ISO weeks, NZ DST both directions, timezone changes), offline queue (ordering, network failure, permanent rejection, concurrent flushes, optimistic overlay), push messages and dead-subscription cleanup, copy voice and no-shame check, **10 golden personas**.
+- **Unit (Vitest), 56 tests:** rating engine (ranks, caps, ceilings, breadth, calibration, decay, quit → Discipline, times-per-week), streaks and shields, XP and levels, dates (ISO weeks, NZ DST both directions, timezone changes), offline queue (ordering, network failure, permanent rejection, concurrent flushes, optimistic overlay), push messages and dead-subscription cleanup, copy voice and no-shame check, **10 golden personas**.
 - **DB (Vitest + real Postgres), 42 tests:**
   - **Parity:** all 10 personas are replayed through the real RPCs day by day. Every day's OVR, raw OVR (to 1e-9), XP total and each tap's XP, bonus and error code match the TS engine.
   - **RLS** for every table: owner-only journal and relapses, hidden private habits and trackers, no direct XP/score writes, column grants, anon locked out, server-only functions, invite gate (OTP + admin paths), single-use member codes, export, account deletion cascade.
@@ -27,6 +27,14 @@
   - Habit create/edit/archive.
   - League + member card + reaction, share PNG is 1080×1920, quit slip, journal, JSON export.
   - Manifest and icons, service worker serving Today offline, gallery at 360/390/430 px with no horizontal scroll, reduced motion.
+
+**Final local run (2026-11-03): 56 unit + 42 DB + 11 e2e = 109 passed, 0 failed** (`npm test`, exit 0). Lint and `tsc --noEmit` are clean.
+
+Bugs the e2e suite caught and fixed this session:
+- Onboarding skipped creating starter habits because RLS made other members' habits visible to an unfiltered "do I have habits?" query.
+- SWR's global `mutate` was a no-op against the persisted cache provider, so post-tap and post-onboarding updates never reached the UI cache. There's now a bound mutator.
+- Offline navigation to a never-visited tab crashed because its JS chunks weren't cached. The SW now precaches each shell page's chunks and is versioned per deploy.
+- Explicit sign-out no longer carries a `?next=` return path.
 
 ### Acceptance criteria status
 

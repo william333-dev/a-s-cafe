@@ -1,6 +1,5 @@
 "use client";
 import { useParams } from "next/navigation";
-import { mutate as gmutate } from "swr";
 import { OvrHistoryChart } from "@/components/charts/ovr-history";
 import { StreakFlame } from "@/components/habits/streak-flame";
 import { ReactionBar } from "@/components/league/reaction-bar";
@@ -10,7 +9,7 @@ import { Card, EmptyState, ErrorState, Header, SectionTitle, Skeleton } from "@/
 import { useToast } from "@/components/ui/toast";
 import { badgeMeta } from "@/lib/badges";
 import { copy } from "@/lib/copy";
-import { useLeague, useMember } from "@/lib/data";
+import { mutate as gmutate, useLeague, useMember } from "@/lib/data";
 import { attrsOf } from "@/lib/snapshot";
 import { supabase } from "@/lib/supabase/client";
 import type { ReactionKind } from "@/lib/types";

@@ -3,13 +3,33 @@
    - Static assets (/_next/static, icons, fonts): cache-first (they're content-hashed).
    - Supabase/API calls: never cached here (the app caches data itself + queues taps).
    - Web Push: show notification, focus/open the app on click. */
-const VERSION = "ovr-v1";
-const SHELL = ["/today", "/stats", "/league", "/profile", "/login", "/offline", "/manifest.webmanifest", "/icons/icon-192.png"];
+// Registered as /sw.js?v=<build id>, so every deploy installs a fresh worker,
+// precaches that build's pages + chunks, and drops the previous build's cache.
+const VERSION = "ovr-" + (new URL(self.location.href).searchParams.get("v") || "dev");
+const SHELL = [
+  "/today", "/ovr", "/stats", "/league", "/profile", "/settings", "/habits", "/habits/new",
+  "/quit", "/journal", "/how-ovr-works", "/login", "/onboarding", "/offline",
+];
+const STATIC = ["/manifest.webmanifest", "/icons/icon-192.png", "/icons/badge-72.png"];
+
+async function precache() {
+  const c = await caches.open(VERSION);
+  await Promise.allSettled(STATIC.map((u) => c.add(new Request(u, { cache: "reload" }))));
+  await Promise.allSettled(
+    SHELL.map(async (u) => {
+      const res = await fetch(u, { cache: "reload" });
+      if (!res.ok) return;
+      await c.put(u, res.clone());
+      // cache the JS/CSS each page needs, so it can hydrate offline
+      const html = await res.text();
+      const assets = new Set([...html.matchAll(/\/_next\/static\/[^"'\s)\\]+/g)].map((m) => m[0]));
+      await Promise.allSettled([...assets].map((a) => caches.match(a).then((hit) => hit || c.add(a))));
+    }),
+  );
+}
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(VERSION).then((c) => Promise.allSettled(SHELL.map((u) => c.add(new Request(u, { cache: "reload" }))))),
-  );
+  event.waitUntil(precache());
   self.skipWaiting();
 });
 
@@ -36,7 +56,7 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(async () => (await caches.match(req, { ignoreSearch: true })) || (await caches.match("/today")) || caches.match("/offline")),
+        .catch(async () => (await caches.match(req, { ignoreSearch: true })) || caches.match("/offline")),
     );
     return;
   }

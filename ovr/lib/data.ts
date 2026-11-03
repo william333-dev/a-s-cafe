@@ -2,7 +2,8 @@
 // Data hooks. SWR with a cache persisted to localStorage so every screen
 // renders instantly from the last sync — including offline.
 
-import useSWR, { mutate as globalMutate, type Cache } from "swr";
+import useSWR, { mutate as defaultMutate, useSWRConfig, type Cache } from "swr";
+import { useLayoutEffect } from "react";
 import { rpc, RpcError } from "./supabase/client";
 import type { Duo, LeagueData, MemberCard, StatsData, TodayData } from "./types";
 
@@ -52,5 +53,19 @@ export const useMember = (handle: string) =>
   useSWR<MemberCard | null>(["member_card", { p_handle: handle }], fetcher, opts);
 export const useDuo = () => useSWR<Duo | null>(["my_duo"], fetcher, opts);
 
-export const refreshToday = () => globalMutate(["get_today"]);
-export const refreshAll = () => globalMutate(() => true);
+// SWR's exported `mutate` only touches the default cache. We use a custom
+// (persisted) cache provider, so bind a mutator to it from inside <SWRConfig>.
+type Mutator = ReturnType<typeof useSWRConfig>["mutate"];
+let bound: Mutator | null = null;
+export const mutate: Mutator = ((...args: Parameters<Mutator>) => (bound ?? (defaultMutate as Mutator))(...args)) as Mutator;
+
+export function MutateBinder() {
+  const { mutate: m } = useSWRConfig();
+  useLayoutEffect(() => {
+    bound = m;
+  }, [m]);
+  return null;
+}
+
+export const refreshToday = () => mutate(["get_today"]);
+export const refreshAll = () => mutate(() => true);

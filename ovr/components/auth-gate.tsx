@@ -8,28 +8,32 @@ import { useToday } from "@/lib/data";
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const path = usePathname();
-  const [state, setState] = useState<"checking" | "in" | "out">("checking");
+  const [state, setState] = useState<"checking" | "in" | "out" | "signed-out">("checking");
   useEffect(() => {
     supabase()
       .auth.getSession()
       .then(({ data }) => setState(data.session ? "in" : "out"));
-    const { data: sub } = supabase().auth.onAuthStateChange((_e, s) => setState(s ? "in" : "out"));
+    const { data: sub } = supabase().auth.onAuthStateChange((e, s) => setState(s ? "in" : e === "SIGNED_OUT" ? "signed-out" : "out"));
     return () => sub.subscription.unsubscribe();
   }, []);
   useEffect(() => {
-    if (state === "out") router.replace(`/login?next=${encodeURIComponent(path)}`);
+    // explicit sign-out → plain login; landing here without a session → come back after login
+    if (state === "signed-out") router.replace("/login");
+    else if (state === "out") router.replace(`/login?next=${encodeURIComponent(path)}`);
   }, [state, router, path]);
   if (state !== "in") return <Splash />;
   return <OnboardedGate>{children}</OnboardedGate>;
 }
 
 function OnboardedGate({ children }: { children: React.ReactNode }) {
-  const { data } = useToday();
+  const { data, isValidating } = useToday();
   const router = useRouter();
+  // only trust "not onboarded" from a fresh fetch, never from the persisted cache
+  const needsOnboarding = !!data && !data.profile.onboarded;
   useEffect(() => {
-    if (data && !data.profile.onboarded) router.replace("/onboarding");
-  }, [data, router]);
-  if (data && !data.profile.onboarded) return <Splash />;
+    if (needsOnboarding && !isValidating) router.replace("/onboarding");
+  }, [needsOnboarding, isValidating, router]);
+  if (needsOnboarding) return <Splash />;
   return <>{children}</>;
 }
 

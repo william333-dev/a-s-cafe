@@ -3,13 +3,13 @@
 // shown instantly, then flushed (now, or when the connection returns).
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { mutate } from "swr";
 import { copy } from "@/lib/copy";
 import { BADGES, badgeMeta } from "@/lib/badges";
 import { buzz } from "@/lib/haptics";
 import { enqueue, flush, pending, type QueuedOp } from "@/lib/offline-queue";
 import { rankFor } from "@/lib/rating-engine";
 import { rpc, RpcError } from "@/lib/supabase/client";
+import { mutate } from "@/lib/data";
 import type { CompletionResult, TodayData } from "@/lib/types";
 import { useToast } from "./ui/toast";
 

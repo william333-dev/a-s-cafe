@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import { pool, q, signUpAndOnboard } from "./helpers";
+import { q, signUpAndOnboard } from "./helpers";
 
-test.afterAll(() => pool.end());
 
 test("league board, member card, reactions, share card PNG, quit slip, journal, export", async ({ page }) => {
   const stamp = Date.now() % 100000;
@@ -14,7 +13,7 @@ test("league board, member card, reactions, share card PNG, quit slip, journal, 
   await expect(page.getByTestId("today-status")).toHaveText("Perfect day. That's how it's done.");
   await page.goto("/settings");
   await page.getByRole("button", { name: "Sign out" }).click();
-  await page.waitForURL("**/login");
+  await page.waitForURL(/\/login/);
 
   await signUpAndOnboard(page, { handle: `hunter${stamp}`, name: "Hunter", quit: "Vaping" });
   await page.goto("/league");
