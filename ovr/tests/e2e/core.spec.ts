@@ -113,6 +113,7 @@ test("habit CRUD: create weekday habit, edit, archive", async ({ page }) => {
   await signUpAndOnboard(page, { handle: `crud${Date.now() % 100000}` });
   await page.getByTestId("fab").click();
   await page.waitForURL("**/habits/new");
+  await page.getByRole("tab", { name: "Make your own" }).click();
   await page.getByLabel("Name").fill("Guitar");
   await page.getByRole("button", { name: /Craft/ }).click();
   await page.getByRole("tab", { name: "Custom" }).click();
@@ -150,4 +151,31 @@ test("long journal line never widens Today (iPhone shrink-to-fit bug) + no fake 
     const box = (await page.getByText("How'd today go?").locator("xpath=ancestor::a[1]").boundingBox())!;
     expect(box.x + box.width).toBeLessThanOrEqual(width);
   }
+});
+
+test("habit templates: one-tap add, add a pack, customise before adding", async ({ page }) => {
+  await signUpAndOnboard(page, { handle: `tpl${Date.now() % 100000}` });
+  const before = await page.getByTestId("habit-row").count();
+  await page.getByTestId("fab").click();
+  await page.waitForURL("**/habits/new");
+  await expect(page.getByTestId("template-picker")).toBeVisible();
+  expect(await page.getByTestId("template-row").count()).toBeGreaterThanOrEqual(60);
+  // search + one-tap add
+  await page.getByLabel("Search habit templates").fill("cold");
+  await page.getByRole("button", { name: "Add Cold shower" }).click();
+  await expect(page.getByRole("button", { name: "Cold shower added" })).toBeVisible();
+  // pack
+  await page.getByLabel("Search habit templates").fill("");
+  await page.getByRole("button", { name: "Add pack Sleep fix" }).click();
+  await expect(page.getByTestId("toast").filter({ hasText: /Sleep fix: \d habits? added/ })).toBeVisible();
+  // customise: tap the row, tweak the name, save
+  await page.getByRole("button", { name: "Customise Read 10 pages" }).click();
+  await expect(page.getByLabel("Name")).toHaveValue("Read 10 pages");
+  await page.getByLabel("Name").fill("Read 20 pages");
+  await page.getByTestId("save-habit").click();
+  await page.waitForURL("**/today");
+  await expect(page.locator("[data-testid=habit-row][data-habit='Read 20 pages']")).toBeVisible();
+  await expect(page.locator("[data-testid=habit-row][data-habit='Cold shower']")).toBeVisible();
+  expect(await page.getByTestId("habit-row").count()).toBeGreaterThanOrEqual(before + 5);
+  await noHorizontalScroll(page);
 });

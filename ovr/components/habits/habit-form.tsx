@@ -8,20 +8,21 @@ import { refreshAll } from "@/lib/data";
 import { ATTRIBUTES, baseXp, type Attribute, type Difficulty, type Schedule } from "@/lib/rating-engine";
 import { supabase } from "@/lib/supabase/client";
 import type { HabitState } from "@/lib/types";
+import type { HabitTemplate } from "@/lib/habit-templates";
 
 const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const EMOJIS = ["✅", "🏋️", "🏃", "🚶", "🧘", "📚", "🎯", "🧊", "📵", "💬", "📞", "🎸", "🚀", "💧", "😴", "🥗", "✍️", "🧹"];
 
-export function HabitForm({ habit, count }: { habit?: HabitState; count: number }) {
+export function HabitForm({ habit, count, template }: { habit?: HabitState; count: number; template?: HabitTemplate }) {
   const router = useRouter();
   const toast = useToast();
-  const [title, setTitle] = useState(habit?.title ?? "");
-  const [emoji, setEmoji] = useState(habit?.emoji ?? "✅");
-  const [attribute, setAttribute] = useState<Attribute>(habit?.attribute ?? "body");
-  const [difficulty, setDifficulty] = useState<Difficulty>(habit?.difficulty ?? "standard");
+  const [title, setTitle] = useState(habit?.title ?? template?.title ?? "");
+  const [emoji, setEmoji] = useState(habit?.emoji ?? template?.emoji ?? "✅");
+  const [attribute, setAttribute] = useState<Attribute>(habit?.attribute ?? template?.attribute ?? "body");
+  const [difficulty, setDifficulty] = useState<Difficulty>(habit?.difficulty ?? template?.difficulty ?? "standard");
   const [customXp, setCustomXp] = useState(habit?.custom_xp ?? 25);
-  const [schedule, setSchedule] = useState<Schedule>(habit?.schedule ?? { type: "daily", target_per_day: 1 });
-  const [time, setTime] = useState(habit?.reminder_time?.slice(0, 5) ?? "");
+  const [schedule, setSchedule] = useState<Schedule>(habit?.schedule ?? template?.schedule ?? { type: "daily", target_per_day: 1 });
+  const [time, setTime] = useState(habit?.reminder_time?.slice(0, 5) ?? template?.time ?? "");
   const [shared, setShared] = useState(habit?.visible_to_league ?? true);
   const [busy, setBusy] = useState(false);
 
