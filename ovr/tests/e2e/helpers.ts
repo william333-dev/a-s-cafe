@@ -34,7 +34,7 @@ export async function signUpAndOnboard(page: Page, opts: { email?: string; handl
   await page.getByLabel("Handle").fill(opts.handle);
   await page.getByLabel("Display name").fill(opts.name ?? opts.handle);
   await page.getByTestId("quiz-next").click();
-  await expect(page.getByTestId("starting-estimate")).toContainText("Starting estimate: 54 · Bronze");
+  await expect(page.getByTestId("starting-estimate")).toContainText("Starting estimate: 54 · Bronze II");
   await page.getByTestId("quiz-next").click();
   const hold = page.getByTestId("hold-to-lock-in");
   const box = (await hold.boundingBox())!;

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import {
-  baseXp, baselineFromRatings, computeOvr, finalOverall, habitStreak, isScheduledDay, nEff, nextRank, perWeek,
-  pgRound, quitStreak, rankFor, streakMultiplier, target, type HabitInput, type CompletionInput,
+  baseXp, baselineFromRatings, computeOvr, finalOverall, habitStreak, isScheduledDay, ladderReach, nEff, nextRank, perWeek,
+  pgRound, quitStreak, rankChange, rankFor, RANKS, streakMultiplier, target, TIERS, type HabitInput, type CompletionInput,
 } from "@/lib/rating-engine";
 import { addDays, rangeDays } from "@/lib/dates";
 
@@ -38,17 +38,42 @@ describe("basics", () => {
     expect(pgRound(20 * 1.15)).toBe(23);
     expect(pgRound(0.49999999999999994)).toBe(1); // 15 significant digits → 0.5
   });
-  test("ranks", () => {
-    expect(rankFor(40).label).toBe("Rookie");
-    expect(rankFor(59).label).toBe("Bronze");
-    expect(rankFor(60).label).toBe("Silver");
-    expect(rankFor(79).label).toBe("Gold");
-    expect(rankFor(86).label).toBe("Platinum");
-    expect(rankFor(87).label).toBe("Diamond");
-    expect(rankFor(92).label).toBe("Diamond");
-    expect(rankFor(93).label).toBe("Apex");
-    expect(nextRank(57)).toMatchObject({ label: "Silver", pointsToGo: 3 });
+  test("rank ladder: 9 tiers, divisions I–III, Apex single", () => {
+    expect(TIERS).toHaveLength(9);
+    expect(RANKS).toHaveLength(25);
+    expect(RANKS.map((r) => r.min)).toEqual([...RANKS.map((r) => r.min)].sort((a, b) => a - b));
+    expect(new Set(RANKS.map((r) => r.min)).size).toBe(25);
+    expect(rankFor(40).label).toBe("Rookie I");
+    expect(rankFor(46).label).toBe("Rookie II");
+    expect(rankFor(49).label).toBe("Rookie III");
+    expect(rankFor(54).label).toBe("Bronze II");
+    expect(rankFor(59)).toMatchObject({ label: "Bronze III", key: "bronze", division: 3 });
+    expect(rankFor(60).label).toBe("Silver I");
+    expect(rankFor(70).label).toBe("Gold I");
+    expect(rankFor(81).label).toBe("Platinum III");
+    expect(rankFor(87).label).toBe("Diamond III");
+    expect(rankFor(88).label).toBe("Master I");
+    expect(rankFor(94).label).toBe("Legend III");
+    expect(rankFor(95)).toMatchObject({ label: "Apex", division: null });
+    expect(rankFor(99).label).toBe("Apex");
+    expect(nextRank(57)).toMatchObject({ label: "Silver I", pointsToGo: 3 });
+    expect(nextRank(50)).toMatchObject({ label: "Bronze II", pointsToGo: 3 });
     expect(nextRank(99)).toBeNull();
+  });
+  test("rank changes: division vs tier", () => {
+    expect(rankChange(50, 53)).toBe("division");
+    expect(rankChange(58, 61)).toBe("tier");
+    expect(rankChange(61, 58)).toBeNull();
+    expect(rankChange(60, 61)).toBeNull();
+  });
+  test("ladder reach = share of members whose best is at or above each rank", () => {
+    const reach = ladderReach([45, 55, 62, 71]);
+    expect(reach.get(rankFor(40).index)).toBe(1);
+    expect(reach.get(rankFor(50).index)).toBe(0.75);
+    expect(reach.get(rankFor(60).index)).toBe(0.5);
+    expect(reach.get(rankFor(70).index)).toBe(0.25);
+    expect(reach.get(rankFor(95).index)).toBe(0);
+    expect(ladderReach([]).get(0)).toBe(0);
   });
   test("baseline from quiz ratings maps 1–10 to 45–65", () => {
     expect(baselineFromRatings({ body: 1 })).toBe(45);

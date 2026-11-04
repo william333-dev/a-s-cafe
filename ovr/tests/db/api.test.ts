@@ -245,3 +245,22 @@ describe("push queue", () => {
     expect((await sql<{ r: unknown[] }>("select public.claim_due_notifications() r"))[0].r).toEqual([]);
   });
 });
+
+describe("rank ladder", () => {
+  test("returns every member's best-ever OVR, plus mine", async () => {
+    await setNow("2026-11-03T00:00:00Z");
+    const a = await member("hunter");
+    const b = await member("sam");
+    await rpc(a, "get_today");
+    await sql("update public.ovr_snapshots set overall = 71 where user_id = $1", [a]);
+    await sql("insert into public.ovr_snapshots(user_id, local_date, overall) values ($1, '2026-11-01', 78)", [a]);
+    await rpc(b, "get_today"); // writes b's first snapshot, like onboarding does
+    const r = await rpc<{ bests: number[]; my_best: number; my_current: number }>(a, "rank_ladder");
+    expect(r.bests[0]).toBe(78);
+    expect(r.bests).toHaveLength(2);
+    expect(r.my_best).toBe(78);
+    expect(r.my_current).toBe(71);
+    expect(b).toBeTruthy();
+    expect(await errCode(asUser(null, "select public.rank_ladder()"))).toMatch(/permission denied/);
+  });
+});

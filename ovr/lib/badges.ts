@@ -6,7 +6,7 @@ export const BADGES: Record<string, { name: string; emoji: string; how: string }
   streak_30: { name: "30-Day Streak", emoji: "🌋", how: "30-day streak on any habit." },
   level_10: { name: "Double Digits", emoji: "🔟", how: "Reach level 10." },
   gold: { name: "Gold Card", emoji: "🟡", how: "Hit 70 OVR." },
-  apex: { name: "First Apex", emoji: "👑", how: "Hit 93 OVR." },
+  apex: { name: "First Apex", emoji: "👑", how: "Hit 95 OVR (Apex)." },
   clean_30: { name: "Clean 30", emoji: "🧊", how: "30 days clean on a quit tracker." },
   week_winner: { name: "Week Winner", emoji: "🏆", how: "Finish a week #1 in the league." },
   full_house: { name: "Full House", emoji: "🃏", how: "Active habits in all six attributes." },

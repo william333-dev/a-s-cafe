@@ -88,6 +88,7 @@ export default function Profile() {
           ["/habits", copy.profile.habits],
           ["/quit", copy.profile.quit],
           ["/journal", copy.profile.journal],
+          ["/ranks", copy.ladder.link],
           ["/how-ovr-works", copy.profile.rules],
           ["/settings", copy.profile.settings],
         ].map(([href, label]) => (

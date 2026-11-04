@@ -8,8 +8,11 @@ test("league board, member card, reactions, share card PNG, quit slip, journal, 
   // a rival who has done more this week (seeded through the real RPC as that user)
   const rivalEmail = await signUpAndOnboard(page, { handle: `sam${stamp}`, name: "Sam" });
   const rivalRows = page.getByTestId("habit-row");
-  const rn = await rivalRows.count();
-  for (let i = 0; i < rn; i++) await rivalRows.nth(i).click();
+  await expect(rivalRows.first()).toBeVisible();
+  for (let i = 0; i < (await rivalRows.count()); i++) {
+    await rivalRows.nth(i).click();
+    await expect(rivalRows.nth(i)).toHaveAttribute("data-done", "true");
+  }
   await expect(page.getByTestId("today-status")).toHaveText("Perfect day. That's how it's done.");
   await page.goto("/settings");
   await page.getByRole("button", { name: "Sign out" }).click();

@@ -64,7 +64,16 @@ test("signup → quiz → Today → complete, perfect day, undo, OVR detail", as
 
   await page.goto("/ovr");
   await expect(page.getByTestId("ovr-card")).toBeVisible();
-  await expect(page.getByTestId("next-rank")).toContainText("to Silver");
+  await expect(page.getByTestId("next-rank")).toContainText(/to (Bronze|Silver) I/);
+  await page.getByTestId("ladder-link").click();
+  await page.waitForURL("**/ranks");
+  await expect(page.getByTestId("ladder-row")).toHaveCount(25);
+  const you = page.locator("[data-testid=ladder-row][data-you=true]");
+  await expect(you).toHaveCount(1);
+  await expect(you).toContainText("You");
+  await expect(page.locator("[data-testid=ladder-row][data-rank='Apex']")).toContainText("0%");
+  await noHorizontalScroll(page);
+  await page.goto("/ovr");
   await page.getByRole("button", { name: "How OVR works" }).click();
   await expect(page.getByRole("dialog")).toContainText("OVR runs 40–99");
   await noHorizontalScroll(page);

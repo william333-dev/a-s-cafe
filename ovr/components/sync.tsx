@@ -7,7 +7,7 @@ import { copy } from "@/lib/copy";
 import { BADGES, badgeMeta } from "@/lib/badges";
 import { buzz } from "@/lib/haptics";
 import { enqueue, flush, pending, type QueuedOp } from "@/lib/offline-queue";
-import { rankFor } from "@/lib/rating-engine";
+import { rankChange, rankFor } from "@/lib/rating-engine";
 import { rpc, RpcError } from "@/lib/supabase/client";
 import { mutate } from "@/lib/data";
 import type { CompletionResult, TodayData } from "@/lib/types";
@@ -108,10 +108,9 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
             }
           } else if (op.kind === "undo" && x.status === "ok") toast(copy.toast.undo, "warn");
         }
-        if (x.prev_ovr != null && x.ovr != null && rankFor(x.ovr).min > rankFor(x.prev_ovr).min) {
-          setCelebration({ kind: "rankup", from: x.prev_ovr, to: x.ovr });
-          toast(copy.toast.rankUp(rankFor(x.ovr).label), "good");
-        }
+        const change = x.prev_ovr != null && x.ovr != null ? rankChange(x.prev_ovr, x.ovr) : null;
+        if (change === "tier") setCelebration({ kind: "rankup", from: x.prev_ovr!, to: x.ovr });
+        if (change) toast(copy.toast.rankUp(rankFor(x.ovr).label), "good");
         if (x.prev_level != null && x.level > x.prev_level) toast(copy.toast.levelUp(x.level), "good");
         for (const b of x.badges ?? []) if (BADGES[b] || b.startsWith("champion")) toast(copy.toast.badge(badgeMeta(b).name), "good");
       } else if (!r.network) {

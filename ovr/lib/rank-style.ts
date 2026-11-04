@@ -7,6 +7,8 @@ export const RANK_GRADIENT: Record<RankKey, [string, string]> = {
   gold: ["#FFD66B", "#C99A2E"],
   platinum: ["#B8F3FF", "#5FA8B8"],
   diamond: ["#C9B8FF", "#6E5BD6"],
+  master: ["#8EF5CF", "#178A6A"],
+  legend: ["#FFD1B8", "#B4506E"],
   apex: ["#FF6A1A", "#FF2D55"],
 };
 
@@ -18,6 +20,8 @@ export const RANK_INK: Record<RankKey, string> = {
   gold: "#2A1E00",
   platinum: "#06262D",
   diamond: "#140B3A",
+  master: "#032A1F",
+  legend: "#2E0A16",
   apex: "#FFFFFF",
 };
 

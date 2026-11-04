@@ -115,6 +115,15 @@ export const copy = {
         : `${delta > 0 ? "+" : ""}${delta} ${attr}: ${done}/${sched} done this week`,
   },
 
+  ladder: {
+    title: "Rank ladder",
+    sub: "Reached = share of the league whose best-ever OVR is at or above each rank.",
+    you: "You",
+    reached: "reached",
+    best: (label: string) => `Your best: ${label}`,
+    link: "Rank ladder",
+  },
+
   stats: {
     title: "Stats",
     history: "OVR history",

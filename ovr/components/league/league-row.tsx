@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { rankFor } from "@/lib/rating-engine";
-import { RANK_GRADIENT } from "@/lib/rank-style";
+import { RankEmblem } from "../rating/rank-emblem";
 import type { LeagueRow as Row } from "@/lib/types";
 import { Avatar } from "./avatar";
 
@@ -35,8 +35,9 @@ export function LeagueRow({ row, mode }: { row: Row; mode: "weekly" | "alltime" 
           {row.display_name} {row.is_me && <span className="text-xs text-muted">(you)</span>}
         </span>
         <span className="flex items-center gap-2 text-xs text-muted">
-          <span className="font-display rounded px-1.5 text-[11px] uppercase text-black" style={{ background: `linear-gradient(90deg, ${RANK_GRADIENT[rank.key].join(",")})` }}>
-            {rank.label}
+          <span className="flex items-center gap-1">
+            <RankEmblem rankKey={rank.key} division={rank.division} size={18} />
+            <span className="font-display text-[11px] uppercase text-fg/80">{rank.label}</span>
           </span>
           {reacts > 0 && <span>{reacts} 🔥</span>}
         </span>

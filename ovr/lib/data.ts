@@ -5,7 +5,7 @@
 import useSWR, { mutate as defaultMutate, useSWRConfig, type Cache } from "swr";
 import { useLayoutEffect } from "react";
 import { rpc, RpcError } from "./supabase/client";
-import type { Duo, LeagueData, MemberCard, StatsData, TodayData } from "./types";
+import type { Duo, LadderData, LeagueData, MemberCard, StatsData, TodayData } from "./types";
 
 const CACHE_KEY = "ovr-swr-cache-v1";
 
@@ -51,6 +51,7 @@ export const useStats = () => useSWR<StatsData>(["get_stats"], fetcher, opts);
 export const useLeague = () => useSWR<LeagueData>(["league_board"], fetcher, { ...opts, refreshInterval: 60_000 });
 export const useMember = (handle: string) =>
   useSWR<MemberCard | null>(["member_card", { p_handle: handle }], fetcher, opts);
+export const useLadder = () => useSWR<LadderData>(["rank_ladder"], fetcher, opts);
 export const useDuo = () => useSWR<Duo | null>(["my_duo"], fetcher, opts);
 
 // SWR's exported `mutate` only touches the default cache. We use a custom

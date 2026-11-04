@@ -166,3 +166,5 @@ export type Duo = {
   combined: number;
   i_am_invitee: boolean;
 };
+
+export type LadderData = { bests: number[]; my_best: number | null; my_current: number | null };

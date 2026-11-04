@@ -318,20 +318,50 @@ export function baselineFromRatings(ratings: Partial<Record<Attribute, number>>)
 }
 
 // ------------------------------------------------------------------ ranks
+// 9 tiers; every tier except Apex has divisions I–III (25 ranks in total).
+// `mins` are the OVR needed for division I, II, III.
 
-export const RANKS = [
-  { key: "rookie", label: "Rookie", min: 40 },
-  { key: "bronze", label: "Bronze", min: 50 },
-  { key: "silver", label: "Silver", min: 60 },
-  { key: "gold", label: "Gold", min: 70 },
-  { key: "platinum", label: "Platinum", min: 80 },
-  { key: "diamond", label: "Diamond", min: 87 },
-  { key: "apex", label: "Apex", min: 93 },
+export const TIERS = [
+  { key: "rookie", label: "Rookie", mins: [40, 44, 47] },
+  { key: "bronze", label: "Bronze", mins: [50, 53, 56] },
+  { key: "silver", label: "Silver", mins: [60, 63, 66] },
+  { key: "gold", label: "Gold", mins: [70, 72, 74] },
+  { key: "platinum", label: "Platinum", mins: [76, 78, 80] },
+  { key: "diamond", label: "Diamond", mins: [82, 84, 86] },
+  { key: "master", label: "Master", mins: [88, 89, 90] },
+  { key: "legend", label: "Legend", mins: [91, 92, 93] },
+  { key: "apex", label: "Apex", mins: [95] },
 ] as const;
-export type RankKey = (typeof RANKS)[number]["key"];
+export type RankKey = (typeof TIERS)[number]["key"];
 
-export function rankFor(ovr: number) {
-  let r: (typeof RANKS)[number] = RANKS[0];
+export type Rank = {
+  /** tier key (drives colours and emblem) */
+  key: RankKey;
+  tier: string;
+  /** 1–3, or null for single-division tiers (Apex) */
+  division: 1 | 2 | 3 | null;
+  /** e.g. "Gold II" */
+  label: string;
+  min: number;
+  /** position on the ladder, 0 = Rookie I */
+  index: number;
+};
+
+const ROMAN = ["I", "II", "III"] as const;
+
+export const RANKS: Rank[] = TIERS.flatMap((t) =>
+  t.mins.map((min, i) => ({
+    key: t.key,
+    tier: t.label,
+    division: t.mins.length > 1 ? ((i + 1) as 1 | 2 | 3) : null,
+    label: t.mins.length > 1 ? `${t.label} ${ROMAN[i]}` : t.label,
+    min,
+    index: 0,
+  })),
+).map((r, index) => ({ ...r, index }));
+
+export function rankFor(ovr: number): Rank {
+  let r = RANKS[0];
   for (const x of RANKS) if (ovr >= x.min) r = x;
   return r;
 }
@@ -339,4 +369,19 @@ export function rankFor(ovr: number) {
 export function nextRank(ovr: number) {
   const r = RANKS.find((x) => x.min > ovr);
   return r ? { ...r, pointsToGo: r.min - ovr } : null;
+}
+
+/** "tier" when a whole new tier is reached, "division" for I→II etc., null otherwise. */
+export function rankChange(prevOvr: number, ovr: number): "tier" | "division" | null {
+  const a = rankFor(prevOvr);
+  const b = rankFor(ovr);
+  if (b.index <= a.index) return null;
+  return a.key === b.key ? "division" : "tier";
+}
+
+/** Share (0–1) of members whose best-ever OVR reaches each rank. */
+export function ladderReach(bests: number[]): Map<number, number> {
+  const out = new Map<number, number>();
+  for (const r of RANKS) out.set(r.index, bests.length ? bests.filter((b) => b >= r.min).length / bests.length : 0);
+  return out;
 }

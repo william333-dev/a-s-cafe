@@ -4,6 +4,12 @@ Newest first within each day. Format: **decision** — why. (Will = owner; "go" 
 
 ## 2026-11-04
 
+- **Rank ladder: 9 tiers × divisions I–III, with Apex as a single top rank (25 ranks).** Will asked for Lock In's ranking system and icons. Copying another app's exact artwork and tier list isn't something I'll do, so this keeps the same idea (tiers with divisions, plus a ladder page showing "% of the league reached") with OVR's own tier names and **original SVG emblems**: chip → shield → hex crest → laurelled crest → crowned shield, with pips for the division.
+  - New tiers are **Master** and **Legend**. Apex moved from 93 to 95, so the "First Apex" badge now means 95.
+  - Old thresholds are kept as tier starts where possible: Bronze 50, Silver 60, Gold 70.
+  - "% reached" uses each member's best-ever snapshot (`rank_ladder()` RPC).
+  - A tier-up gets the full flip; a division-up gets a toast. Divisions are only 1–3 points apart, so a flip every time would be too much.
+
 - **Plain email + password sign-up. No invite code, no emailed code.** Will's call ("I just want normal sign up"). This replaces the email-OTP and invite-code decisions below.
   - The invite gate is kept but **off**: `private.app_config.require_invite = 'false'`. Setting it to `'true'` turns the auth hook and the `auth.users` trigger guard back on (tested both ways in `tests/db/rls.test.ts`).
   - "Confirm email" is off in Supabase, so sign-up logs you straight in.

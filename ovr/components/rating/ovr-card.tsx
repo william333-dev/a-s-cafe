@@ -4,6 +4,7 @@ import { ATTRIBUTE_META } from "@/lib/copy";
 import { ATTRIBUTES, rankFor, type Attribute } from "@/lib/rating-engine";
 import { RANK_GRADIENT, RANK_INK, avatarColors } from "@/lib/rank-style";
 import { CountUp } from "./count-up";
+import { RankEmblem } from "./rank-emblem";
 
 export type OvrCardProps = {
   overall: number;
@@ -39,7 +40,10 @@ export function OvrCard({ overall, name, handle, level, attrs = {}, avatarSeed =
         <div className="relative flex items-start gap-4">
           <div className="flex flex-col items-start leading-none">
             <CountUp value={overall} className={`font-display ${compact ? "text-7xl" : "text-[104px]"} leading-[0.85]`} />
-            <span className="font-display mt-1 text-lg uppercase tracking-[0.2em] opacity-90">{rank.label}</span>
+            <span className="mt-1 flex items-center gap-1.5">
+              <RankEmblem rankKey={rank.key} division={rank.division} size={compact ? 24 : 30} />
+              <span className="font-display text-lg uppercase tracking-[0.14em] opacity-90">{rank.label}</span>
+            </span>
             {delta != null && delta !== 0 && (
               <motion.span initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="font-display tnum mt-1 rounded-md bg-black/25 px-1.5 text-sm" style={{ color: delta > 0 ? "#BFF0FF" : ink }}>
                 {delta > 0 ? "▲" : "▼"} {Math.abs(delta)} today

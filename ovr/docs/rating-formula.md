@@ -61,15 +61,23 @@ For each attribute `k`:
 
 ## Ranks
 
-| OVR | Rank |
-|---|---|
-| 40–49 | Rookie |
-| 50–59 | Bronze |
-| 60–69 | Silver |
-| 70–79 | Gold |
-| 80–86 | Platinum |
-| 87–92 | Diamond |
-| 93–99 | Apex |
+There are 9 tiers. Each tier has three divisions (I → II → III), except Apex, which is a single top rank. That's 25 ranks in total. The number is the OVR you need to reach that rank.
+
+| Tier | I | II | III |
+|---|---|---|---|
+| Rookie | 40 | 44 | 47 |
+| Bronze | 50 | 53 | 56 |
+| Silver | 60 | 63 | 66 |
+| Gold | 70 | 72 | 74 |
+| Platinum | 76 | 78 | 80 |
+| Diamond | 82 | 84 | 86 |
+| Master | 88 | 89 | 90 |
+| Legend | 91 | 92 | 93 |
+| Apex | 95 | | |
+
+- **New tier** (for example Bronze III → Silver I): full card-flip celebration.
+- **New division** (for example Bronze I → Bronze II): a toast.
+- **Rank Ladder page:** shows, for every rank, the share of your league whose *best-ever* OVR has reached it.
 
 ## "Why it moved"
 

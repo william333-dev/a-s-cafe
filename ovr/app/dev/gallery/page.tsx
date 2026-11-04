@@ -8,6 +8,8 @@ import { LeagueRow } from "@/components/league/league-row";
 import { ReactionBar } from "@/components/league/reaction-bar";
 import { AttributeRadar } from "@/components/rating/attribute-radar";
 import { OvrCard } from "@/components/rating/ovr-card";
+import { RankEmblem } from "@/components/rating/rank-emblem";
+import { RANKS } from "@/lib/rating-engine";
 import { Button, Card, EmptyState, ErrorState, ProgressBar, SectionTitle, Segmented, Skeleton, Toggle } from "@/components/ui/primitives";
 import { HoldToLockInButton } from "@/components/ui/hold-button";
 import { useToast } from "@/components/ui/toast";
@@ -36,9 +38,19 @@ export default function Gallery() {
   return (
     <main className="pt-safe mx-auto max-w-lg px-4 pb-20">
       <h1 className="font-display mt-4 text-4xl uppercase">Gallery</h1>
+      <SectionTitle>Rank emblems · all 25</SectionTitle>
+      <div className="grid grid-cols-5 gap-2" data-testid="emblem-grid">
+        {RANKS.map((r) => (
+          <div key={r.index} className="flex flex-col items-center text-center text-[10px] text-muted">
+            <RankEmblem rankKey={r.key} division={r.division} size={48} />
+            {r.label}
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex gap-2"><RankEmblem rankKey="gold" division={2} size={40} locked /><span className="self-center text-xs text-muted">locked state</span></div>
       <SectionTitle>OvrCard · every tier</SectionTitle>
       <div className="grid grid-cols-1 gap-3">
-        {[45, 55, 65, 75, 84, 90, 96].map((o) => (
+        {[45, 55, 65, 73, 79, 85, 89, 93, 96].map((o) => (
           <OvrCard key={o} overall={o} name="Will" handle="will" level={7} attrs={{ body: o, mind: o - 3, focus: o + 2, discipline: null, social: o - 8, craft: o - 1 }} compact={o !== 96} delta={o === 75 ? 2 : null} />
         ))}
       </div>

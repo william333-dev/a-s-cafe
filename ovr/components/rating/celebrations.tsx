@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo } from "react";
 import { rankFor } from "@/lib/rating-engine";
 import { RANK_GRADIENT } from "@/lib/rank-style";
+import { RankEmblem } from "./rank-emblem";
 import { useSync } from "../sync";
 
 const COLORS = ["#FF6A1A", "#5AC8FA", "#2FD27A", "#FFD66B", "#F5F5F7", "#FF2D55"];
@@ -80,6 +81,7 @@ export function Celebrations() {
             className="flex h-80 w-56 flex-col items-center justify-center rounded-[28px] text-black shadow-2xl"
           >
             <div className="absolute inset-0 rounded-[28px]" style={{ background: `linear-gradient(140deg, ${RANK_GRADIENT[rankFor(celebration.to).key].join(",")})` }} />
+            <span className="relative mb-1"><RankEmblem rankKey={rankFor(celebration.to).key} division={rankFor(celebration.to).division} size={64} /></span>
             <span className="font-display relative text-8xl leading-none">{celebration.to}</span>
             <span className="font-display relative mt-2 text-3xl uppercase tracking-[0.2em]">{rankFor(celebration.to).label}</span>
             <span className="relative mt-4 text-sm font-semibold opacity-70">Rank up</span>

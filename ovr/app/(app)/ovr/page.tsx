@@ -6,7 +6,8 @@ import { OvrCard } from "@/components/rating/ovr-card";
 import { Card, ErrorState, Header, ProgressBar, SectionTitle, Sheet, Skeleton } from "@/components/ui/primitives";
 import { ATTRIBUTE_META, copy } from "@/lib/copy";
 import { useToday } from "@/lib/data";
-import { nextRank, rankFor, RANKS, type Attribute } from "@/lib/rating-engine";
+import { nextRank, rankFor, TIERS, type Attribute } from "@/lib/rating-engine";
+import { RankEmblem } from "@/components/rating/rank-emblem";
 import { attrsOf } from "@/lib/snapshot";
 import { HowOvrWorks } from "@/components/how-ovr-works";
 
@@ -27,16 +28,21 @@ export default function OvrDetail() {
       <OvrCard overall={s.overall} name={data.profile.display_name} handle={data.profile.handle} level={data.level.level} attrs={attrsOf(s)} avatarSeed={data.profile.avatar_seed} delta={delta} />
 
       <Card className="mt-4 p-4">
-        <div className="mb-2 flex items-baseline justify-between">
-          <span className="font-display text-xl uppercase">{rank.label}</span>
+        <div className="mb-2 flex items-center gap-3">
+          <RankEmblem rankKey={rank.key} division={rank.division} size={48} />
+          <span className="font-display flex-1 text-2xl uppercase">{rank.label}</span>
           <span className="text-sm text-muted" data-testid="next-rank">{nr ? copy.ovr.nextRank(nr.pointsToGo, nr.label) : copy.ovr.maxRank}</span>
         </div>
         {nr && <ProgressBar value={s.overall - rank.min} max={nr.min - rank.min} color="bg-ice" />}
         <div className="mt-3 flex justify-between text-[10px] uppercase text-muted">
-          {RANKS.map((r) => (
-            <span key={r.key} className={r.key === rank.key ? "text-fg" : ""}>{r.min}</span>
+          {TIERS.map((t) => (
+            <span key={t.key} className={t.key === rank.key ? "text-fg" : ""}>{t.mins[0]}</span>
           ))}
         </div>
+        <Link href="/ranks" className="mt-3 flex min-h-11 items-center justify-between rounded-xl bg-raised px-3 text-sm font-semibold active:opacity-80" data-testid="ladder-link">
+          <span>{copy.ladder.link}</span>
+          <span className="text-muted">›</span>
+        </Link>
       </Card>
 
       <SectionTitle>{copy.ovr.whyTitle}</SectionTitle>

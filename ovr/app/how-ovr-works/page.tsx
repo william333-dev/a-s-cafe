@@ -44,7 +44,7 @@ export default function HowOvrWorksPage() {
       </ul>
 
       <H>5. Ranks</H>
-      <p>40–49 Rookie · 50–59 Bronze · 60–69 Silver · 70–79 Gold · 80–86 Platinum · 87–92 Diamond · 93–99 Apex.</p>
+      <p>Nine tiers, each with divisions I–III except Apex: Rookie 40 · Bronze 50 · Silver 60 · Gold 70 · Platinum 76 · Diamond 82 · Master 88 · Legend 91 · Apex 95. Divisions sit a few points apart. See the <Link className="underline" href="/ranks">rank ladder</Link> for every threshold and how much of your league has reached it.</p>
 
       <H>6. The league</H>
       <p>Weekly standings rank by completion rate (done ÷ scheduled), with XP as the tiebreak. It&apos;s computed on the server from your completions, so nobody can fake it — and adding 20 easy habits doesn&apos;t win, finishing what you scheduled does.</p>
