@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* OVR design tokens — dark-first, sports-card vibe */
+@theme {
+  --color-bg: #0b0b0d;
+  --color-surface: #141418;
+  --color-raised: #1c1c22;
+  --color-stroke: #2a2a33;
+  --color-fg: #f5f5f7;
+  --color-muted: #a1a1aa;
+  --color-ember: #ff6a1a;
+  --color-ice: #5ac8fa;
+  --color-success: #2fd27a;
+  --color-danger: #ff4d4d;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-barlow), "Arial Narrow", sans-serif;
+
+  --radius-card: 22px;
+  --animate-sheen: sheen 3.2s linear infinite;
+  --animate-flame: flame 1.6s ease-in-out infinite;
+
+  @keyframes sheen {
+    0% { transform: translateX(-120%) skewX(-20deg); }
+    60%, 100% { transform: translateX(220%) skewX(-20deg); }
+  }
+  @keyframes flame {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1.08) rotate(3deg); }
+  }
+}
+
+:root {
+  color-scheme: dark;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tabbar-h: 64px;
+}
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+body { min-height: 100dvh; font-feature-settings: "cv11", "ss01"; }
+
+.tnum { font-variant-numeric: tabular-nums; }
+.font-display { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.01em; }
+.pt-safe { padding-top: max(var(--safe-top), 12px); }
+.pb-tabbar { padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 24px); }
+.no-select { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
