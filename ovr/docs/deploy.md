@@ -27,7 +27,7 @@ git push git@github.com:<you>/ovr.git ovr-only:main
    update private.app_config set value = 'true' where key = 'require_invite';
    insert into public.invite_codes(code, uses_left) values ('LOCKIN', 30);
    ```
-   For the friendly error message, also set **Authentication → Hooks → Before User Created** to `public.hook_before_user_created`.
+   The login page currently has no invite-code field, so also ask Claude to add it back (it passes `invite_code` in `signUp` options `data`). The hook `public.hook_before_user_created` is already enabled and gives the friendly error.
 6. Email sending: the only emails are password resets, so Supabase's built-in email (a few an hour) is fine to start with.
 
 ## 2. Vercel
