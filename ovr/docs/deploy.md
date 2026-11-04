@@ -14,7 +14,7 @@ git push git@github.com:<you>/ovr.git ovr-only:main
 ## 1. Supabase project
 
 1. Go to supabase.com and create a **New project** in region **Sydney (ap-southeast-2)**. Save the DB password.
-2. Link the project and push the schema from your machine:
+2. Push the schema. **No terminal?** Add repo secrets `SUPABASE_ACCESS_TOKEN` (supabase.com/dashboard/account/tokens), `SUPABASE_PROJECT_REF` and `SUPABASE_DB_PASSWORD`, then run GitHub → Actions → **"OVR: push database"**. Or from your machine:
    ```bash
    npx supabase login
    npx supabase link --project-ref <ref>
