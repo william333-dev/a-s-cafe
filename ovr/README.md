@@ -1,6 +1,8 @@
 # OVR — self-improvement, ranked
 
-A private, invite-only PWA for one friend group. Tick habits, earn XP, and watch your **OVR** (40–99, sports-card style) climb across six attributes. Compete in a private weekly league.
+**Live:** https://ovr-jet.vercel.app
+
+A private PWA for one friend group. Tick habits, earn XP, and watch your **OVR** (40–99, sports-card style) climb across six attributes. Compete in a private weekly league.
 
 - **Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind 4 · Motion · Recharts · Supabase (Postgres + RLS + email/password Auth + pg_cron) · Web Push · Vercel
 - **Docs:** [rating formula](docs/rating-formula.md) · [decisions](docs/decisions.md) · [progress](docs/progress.md) · [deploy](docs/deploy.md)

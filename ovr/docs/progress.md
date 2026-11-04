@@ -1,5 +1,15 @@
 # Progress
 
+## 2026-11-04: Live
+
+- **Production:** https://ovr-jet.vercel.app (Vercel project `ovr`; Supabase project `ovr`, Sydney, ref `ixmkigxbdblqtzqsonqi`).
+- **Database:** all 5 migrations applied, including the 15-minute cron job, which reaches `/api/push/dispatch` and gets a 200.
+- **Auth:** plain email + password. Confirm email is off, minimum password length is 8, and `require_invite = false`.
+- **Smoke test on production:** sign-up → straight to the setup quiz, with no email and no console errors. The test account was deleted afterwards.
+- **Still to check on a real phone:** iPhone Home Screen install and push delivery.
+- **Not wired up yet:** Vercel isn't connected to the GitHub repo, so pushes don't auto-deploy. Deploy with `npx vercel --prod` from `ovr/`, or connect the repo in Vercel → Settings → Git (Root Directory `ovr`).
+
+
 ## 2026-11-03: Phases 0–5 built and tested locally (Phase 6 coach not built, as instructed)
 
 ### Done
