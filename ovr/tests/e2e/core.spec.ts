@@ -1,17 +1,30 @@
 import { expect, test } from "@playwright/test";
-import { noHorizontalScroll, q, signIn, signUpAndOnboard, uniqueEmail } from "./helpers";
+import { PASSWORD, noHorizontalScroll, q, signIn, signUpAndOnboard, uniqueEmail } from "./helpers";
 
 
-test("invite gate: no code, no account", async ({ page }) => {
+test("plain email + password: no codes, wrong password refused, duplicate sign-up redirected", async ({ page }) => {
   await page.goto("/login");
   await expect(page.getByTestId("privacy-note")).toContainText("Your journal and relapse notes are visible to you only");
-  await page.getByLabel("Invite code").fill("NOPE99");
-  await page.getByLabel("Email").fill(uniqueEmail("x"));
-  await page.getByRole("button", { name: "Send my code" }).click();
-  await expect(page.locator("p[role=alert]")).toHaveText("That code's dead. Ask a mate for a fresh one.");
-  await page.getByLabel("Invite code").fill("");
-  await page.getByRole("button", { name: "Send my code" }).click();
-  await expect(page.locator("p[role=alert]")).toContainText("No account for that email");
+  await expect(page.getByLabel("Invite code")).toHaveCount(0);
+  const email = uniqueEmail("plain");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("short");
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.locator("p[role=alert]")).toHaveText("Password needs to be at least 8 characters.");
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.waitForURL("**/onboarding");
+  await page.evaluate(() => localStorage.clear());
+  await page.goto("/login");
+  await page.getByRole("tab", { name: "Sign in" }).click();
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill("wrong-password");
+  await page.getByRole("button", { name: "Lock in" }).click();
+  await expect(page.locator("p[role=alert]")).toHaveText("Wrong email or password.");
+  await page.getByRole("tab", { name: "Sign up" }).click();
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page.locator("p[role=alert]")).toHaveText("You've already got an account. Sign in instead.");
 });
 
 test("signup → quiz → Today → complete, perfect day, undo, OVR detail", async ({ page }) => {

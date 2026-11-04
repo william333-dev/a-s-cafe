@@ -9,14 +9,12 @@ import { copy } from "@/lib/copy";
 import { useStats, useToday } from "@/lib/data";
 import { renderChartCard, renderOvrCard, shareOrDownload, toBlob } from "@/lib/share-card";
 import { attrsOf } from "@/lib/snapshot";
-import { rpc } from "@/lib/supabase/client";
 
 export default function Profile() {
   const { data, isLoading, mutate } = useToday();
   const { data: stats } = useStats();
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
-  const [invite, setInvite] = useState<string | null>(null);
   if (!data && isLoading) return <Skeleton className="mt-16 h-96" />;
   if (!data) return <ErrorState onRetry={() => mutate()} />;
 
@@ -35,13 +33,15 @@ export default function Profile() {
     }
   };
   const makeInvite = async () => {
+    const url = `${location.origin}/login`;
     try {
-      const code = await rpc<string>("create_invite");
-      setInvite(code);
-      const link = `${location.origin}/login?invite=${code}`;
-      if (navigator.share) navigator.share({ title: "OVR", text: `Join my OVR league. Code: ${code}`, url: link }).catch(() => {});
-    } catch (e) {
-      toast((e as Error).message === "invite_limit" ? copy.profile.inviteLimit : copy.toast.error, "warn");
+      if (navigator.share) await navigator.share({ title: "OVR", text: copy.profile.inviteText, url });
+      else {
+        await navigator.clipboard.writeText(`${copy.profile.inviteText} ${url}`);
+        toast(copy.profile.inviteCopied, "good");
+      }
+    } catch {
+      /* share sheet cancelled */
     }
   };
 
@@ -59,7 +59,6 @@ export default function Profile() {
 
       <Card className="mt-3 p-4">
         <Button className="w-full" onClick={makeInvite}>{copy.profile.invite}</Button>
-        {invite && <p className="font-display tnum mt-3 text-center text-xl tracking-widest" data-testid="invite-code">{copy.profile.inviteMade(invite)}</p>}
       </Card>
 
       {data.settings.setup.goal && (

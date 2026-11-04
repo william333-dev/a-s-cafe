@@ -4,34 +4,18 @@ import pg from "pg";
 export const pool = new pg.Pool({ connectionString: "postgresql://postgres:postgres@127.0.0.1:54322/postgres", max: 2 });
 export const q = async <T = Record<string, unknown>>(sql: string, p: unknown[] = []) => (await pool.query(sql, p)).rows as T[];
 
-export async function otpFor(email: string, since = 0): Promise<string> {
-  for (let i = 0; i < 30; i++) {
-    const r = await fetch(`http://127.0.0.1:54324/api/v1/messages?limit=50`).then((x) => x.json());
-    const m = (r.messages ?? []).find(
-      (x: { To: { Address: string }[]; Created: string }) => x.To?.some((t) => t.Address === email) && Date.parse(x.Created) >= since - 2000,
-    );
-    if (m) {
-      const full = await fetch(`http://127.0.0.1:54324/api/v1/message/${m.ID}`).then((x) => x.json());
-      const code = (full.Text as string).match(/\b(\d{6})\b/)?.[1];
-      if (code) return code;
-    }
-    await new Promise((res) => setTimeout(res, 300));
-  }
-  throw new Error(`no OTP email for ${email}`);
-}
-
 export const uniqueEmail = (p: string) => `${p}${Date.now()}${Math.floor(Math.random() * 1000)}@ovr.test`;
 
-/** Full signup through the UI: invite + email OTP + setup quiz + hold-to-lock-in. */
+export const PASSWORD = "lock-in-123";
+
+/** Full signup through the UI: email + password, setup quiz, hold-to-lock-in. */
 export async function signUpAndOnboard(page: Page, opts: { email?: string; handle: string; name?: string; quit?: string }) {
   const email = opts.email ?? uniqueEmail(opts.handle);
   await page.goto("/login");
-  await page.getByLabel("Invite code").fill("LOCKIN");
+  await page.getByRole("tab", { name: "Sign up" }).click();
   await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Send my code" }).click();
-  await expect(page.getByLabel("6-digit code")).toBeVisible();
-  await page.getByLabel("6-digit code").fill(await otpFor(email));
-  await page.getByRole("button", { name: "Lock in" }).click();
+  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: "Create account" }).click();
   await page.waitForURL("**/onboarding");
 
   await page.getByRole("button", { name: /Body/ }).click();
@@ -62,12 +46,11 @@ export async function signUpAndOnboard(page: Page, opts: { email?: string; handl
   return email;
 }
 
-export async function signIn(page: Page, email: string) {
+export async function signIn(page: Page, email: string, password = PASSWORD) {
   await page.goto("/login");
+  await page.getByRole("tab", { name: "Sign in" }).click();
   await page.getByLabel("Email").fill(email);
-  const since = Date.now();
-  await page.getByRole("button", { name: "Send my code" }).click();
-  await page.getByLabel("6-digit code").fill(await otpFor(email, since));
+  await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Lock in" }).click();
   await page.waitForURL("**/today");
 }

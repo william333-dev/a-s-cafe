@@ -2,7 +2,7 @@
 
 A private, invite-only PWA for one friend group. Tick habits, earn XP, and watch your **OVR** (40–99, sports-card style) climb across six attributes. Compete in a private weekly league.
 
-- **Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind 4 · Motion · Recharts · Supabase (Postgres + RLS + Auth OTP + pg_cron) · Web Push · Vercel
+- **Stack:** Next.js 16 (App Router) · TypeScript strict · Tailwind 4 · Motion · Recharts · Supabase (Postgres + RLS + email/password Auth + pg_cron) · Web Push · Vercel
 - **Docs:** [rating formula](docs/rating-formula.md) · [decisions](docs/decisions.md) · [progress](docs/progress.md) · [deploy](docs/deploy.md)
 
 ## Run it locally
@@ -11,11 +11,11 @@ Needs Node 22+ and Docker.
 
 ```bash
 npm install
-npx supabase start          # local Postgres/Auth/Mailpit; applies migrations + seed (invite code LOCKIN)
+npx supabase start          # local Postgres/Auth/Mailpit; applies migrations + seed
 npm run build && npm start  # http://localhost:3000  (or: npm run dev)
 ```
 
-Sign in at http://localhost:3000/login with invite code `LOCKIN` and any email. The 6-digit code arrives in Mailpit at http://127.0.0.1:54324. `.env.local` holds the local demo keys (copy `.env.example` for production).
+Sign up at http://localhost:3000/login with any email and a password (8+ characters). `.env.local` holds the local demo keys (copy `.env.example` for production).
 
 ## Tests
 
@@ -29,7 +29,7 @@ npm test            # all of the above
 ## Layout
 
 ```
-app/(auth)/login          invite + email OTP
+app/(auth)/login          email + password (reset-password too)
 app/onboarding            9-step setup quiz with hold-to-lock-in
 app/(app)/…               today, ovr, stats, league, league/[handle], profile, settings, habits, quit, journal
 app/api/push/*            push dispatch (cron) + test push

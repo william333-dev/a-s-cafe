@@ -2,6 +2,15 @@
 
 Newest first within each day. Format: **decision** — why. (Will = owner; "go" = approved.)
 
+## 2026-11-04
+
+- **Plain email + password sign-up. No invite code, no emailed code.** Will's call ("I just want normal sign up"). This replaces the email-OTP and invite-code decisions below.
+  - The invite gate is kept but **off**: `private.app_config.require_invite = 'false'`. Setting it to `'true'` turns the auth hook and the `auth.users` trigger guard back on (tested both ways in `tests/db/rls.test.ts`).
+  - "Confirm email" is off in Supabase, so sign-up logs you straight in.
+  - Forgot password sends a reset email to `/reset-password`. It's the only email the app sends.
+  - "Invite a mate" now just shares the app link.
+  - Tradeoff: anyone with the URL can make an account and appear in the league. The URL is unlisted; flip the switch if it becomes a problem.
+
 ## 2026-11-03 — build session (Will said: "make every decision yourself using your recommendations")
 
 ### Product / scope

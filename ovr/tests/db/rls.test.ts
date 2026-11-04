@@ -130,29 +130,41 @@ describe("writes", () => {
 });
 
 describe("invites + account lifecycle", () => {
-  test("signup without a valid invite is refused (OTP path → friendly hook error)", async () => {
-    const otp = (email: string, invite?: string) =>
-      fetch(`${API_URL}/auth/v1/otp`, {
-        method: "POST",
-        headers: { apikey: ANON_KEY, "content-type": "application/json" },
-        body: JSON.stringify({ email, create_user: true, data: invite ? { invite_code: invite } : {} }),
-      }).then(async (r) => ({ status: r.status, body: await r.json() }));
-    const bad = await otp("stranger@ovr.test", "NOPE1234");
-    expect(bad.status).toBe(403);
-    expect(bad.body.msg).toMatch(/Invite code invalid/);
-    expect((await otp("stranger2@ovr.test")).status).toBe(403);
-    expect((await otp("friend@ovr.test", "lockin")).status).toBe(200);
+  test("open sign-up by default: no invite needed (password path)", async () => {
+    const r = await fetch(`${API_URL}/auth/v1/signup`, {
+      method: "POST",
+      headers: { apikey: ANON_KEY, "content-type": "application/json" },
+      body: JSON.stringify({ email: `open${Date.now()}@ovr.test`, password: "password-123" }),
+    });
+    expect(r.status).toBe(200);
+    expect(await createUser({ invite: null })).toBeTruthy();
   });
-  test("signup without a valid invite is refused (any other path → trigger guard)", async () => {
-    expect(await errCode(createUser({ invite: null }))).toMatch(/Invite code invalid|invite_required|Database error/);
-    expect(await errCode(createUser({ invite: "NOPE1234" }))).toMatch(/Invite code invalid|invite_required|Database error/);
-    await sql("insert into public.invite_codes(code, uses_left, expires_at) values ('OLDCODE', 5, now() - interval '1 day')");
-    expect(await errCode(createUser({ invite: "OLDCODE" }))).toMatch(/Invite code invalid|invite_required|Database error/);
+  test("with require_invite switched on, sign-up needs a valid code", async () => {
+    await sql("update private.app_config set value = 'true' where key = 'require_invite'");
+    try {
+      const signup = (email: string, invite?: string) =>
+        fetch(`${API_URL}/auth/v1/signup`, {
+          method: "POST",
+          headers: { apikey: ANON_KEY, "content-type": "application/json" },
+          body: JSON.stringify({ email, password: "password-123", data: invite ? { invite_code: invite } : {} }),
+        }).then(async (r) => ({ status: r.status, body: await r.json() }));
+      const bad = await signup(`stranger${Date.now()}@ovr.test`, "NOPE1234");
+      expect(bad.status).toBe(403);
+      expect(bad.body.msg).toMatch(/Invite code invalid/);
+      expect((await signup(`stranger2${Date.now()}@ovr.test`)).status).toBe(403);
+      expect((await signup(`friend${Date.now()}@ovr.test`, "lockin")).status).toBe(200);
+      // any other path is still guarded by the trigger
+      expect(await errCode(createUser({ invite: null }))).toMatch(/Invite code invalid|invite_required|Database error/);
+      await sql("insert into public.invite_codes(code, uses_left, expires_at) values ('OLDCODE', 5, now() - interval '1 day') on conflict do nothing");
+      expect(await errCode(createUser({ invite: "OLDCODE" }))).toMatch(/Invite code invalid|invite_required|Database error/);
+      const code = await rpc<string>(A, "create_invite");
+      await createUser({ invite: code.toLowerCase() });
+      expect(await errCode(createUser({ invite: code }))).toMatch(/Invite code invalid|invite_required/);
+    } finally {
+      await sql("update private.app_config set value = 'false' where key = 'require_invite'");
+    }
   });
-  test("codes are single-use when made by members, max 3 active each", async () => {
-    const code = await rpc<string>(A, "create_invite");
-    await createUser({ invite: code.toLowerCase() });
-    expect(await errCode(createUser({ invite: code }))).toMatch(/Invite code invalid|invite_required/);
+  test("member invite codes: max 3 active each", async () => {
     await rpc(A, "create_invite");
     await rpc(A, "create_invite");
     await rpc(A, "create_invite");
