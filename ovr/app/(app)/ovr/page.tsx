@@ -20,7 +20,7 @@ export default function OvrDetail() {
   const rank = rankFor(s.overall);
   const nr = nextRank(s.overall);
   const reasons = (s.top_reasons ?? []).filter(Boolean);
-  const delta = data.prev_snapshot ? s.overall - data.prev_snapshot.overall : null;
+  const delta = data.prev_snapshot?.overall != null ? s.overall - data.prev_snapshot.overall : null;
 
   return (
     <div>

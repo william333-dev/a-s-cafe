@@ -37,7 +37,8 @@ export default function Today() {
   const left = todays.filter((h) => h.today_count < h.target && h.schedule.type !== "times_per_week").length;
   const missedYesterday = data.habits.filter((h) => h.scheduled_yesterday && h.yesterday_count < h.target && h.schedule.type !== "times_per_week");
   const bestStreak = Math.max(0, ...data.habits.map((h) => h.streak));
-  const delta = data.prev_snapshot ? data.snapshot.overall - data.prev_snapshot.overall : null;
+  // no previous day yet (first day) → no movement badge
+  const delta = data.prev_snapshot?.overall != null ? data.snapshot.overall - data.prev_snapshot.overall : null;
   const hour = new Date().getHours();
   const shieldYesterday = data.habits.some((h) => h.last_shield_date === yesterday);
 
@@ -60,7 +61,7 @@ export default function Today() {
       </Link>
 
       <div className="mt-3 flex items-center gap-3 px-1">
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <ProgressBar value={data.level.into + 0} max={data.level.needed} />
         </div>
         <span className="tnum text-xs text-muted" data-testid="xp-today">
@@ -126,7 +127,7 @@ export default function Today() {
         <Link href="/journal" className="mt-6 block">
           <Card className="flex items-center gap-3 p-4 active:bg-raised">
             <span className="text-2xl">{data.journal_today ? copy.journal.moods[data.journal_today.mood - 1] : "📝"}</span>
-            <span className="flex-1">
+            <span className="min-w-0 flex-1">
               <span className="block font-semibold">{copy.today.journalPrompt}</span>
               <span className="block truncate text-sm text-muted">{data.journal_today?.body || copy.journal.prompt}</span>
             </span>

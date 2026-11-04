@@ -131,3 +131,23 @@ test("habit CRUD: create weekday habit, edit, archive", async ({ page }) => {
   await page.waitForURL("**/habits");
   await expect(page.getByText("Guitar practice")).toHaveCount(0);
 });
+
+test("long journal line never widens Today (iPhone shrink-to-fit bug) + no fake '▲ today' on day 1", async ({ page }) => {
+  await signUpAndOnboard(page, { handle: `wide${Date.now() % 100000}` });
+  // day 1: there is no previous snapshot, so there must be no movement badge
+  await expect(page.getByTestId("ovr-card")).toBeVisible();
+  await expect(page.getByTestId("ovr-card")).not.toContainText("today");
+  await page.goto("/journal");
+  await page.getByRole("radio").nth(4).click();
+  await page.getByLabel("Journal line").fill("Today was good I got good workout and short school day and then went to the beach with the boys after");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByTestId("toast").filter({ hasText: "Saved." })).toBeVisible();
+  for (const width of [375, 390, 430]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/today");
+    await expect(page.getByText("How'd today go?")).toBeVisible();
+    await noHorizontalScroll(page);
+    const box = (await page.getByText("How'd today go?").locator("xpath=ancestor::a[1]").boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+  }
+});
